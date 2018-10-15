@@ -6,6 +6,7 @@
 ## -g to glossary.
 ## -e to embed R fonts.
 ## -a to do all of the above.
+## -t to test knitting.
 ## -c to clean.
 ## -p to clean all but the PDF.
 
@@ -19,7 +20,9 @@ dogloss=false
 doclean=false
 docleanpdf=false
 doembed=false
-while getopts ":aklgbcpe" opt; do
+dotest=false
+dopdf=true
+while getopts ":aklgbcpet" opt; do
     case $opt in
 	a)
 	    doknit=true
@@ -46,6 +49,10 @@ while getopts ":aklgbcpe" opt; do
 	e)
 	    doembed=true
 	    ;;
+	t)
+	    dotest=true
+	    dopdf=false
+	    ;;
 	\?)
 	    echo "Invalid option: -${OPTARG}." >&2
 	    ;;
@@ -62,7 +69,7 @@ if [ -a "$prefix".Rnw ]; then
     rnw_exists=true
 else
     rnw_exists=false
-    if [ "$doknit" = true ]; then
+    if [ "$doknit" = true ] || [ "$dotest" = true ]; then
 	echo "ERROR: .Rnw doesn't exist." >&2
 	exit 2
     fi
@@ -84,22 +91,30 @@ if [ "$doclean" = true ]; then
     if [ "$dogloss" = true ]; then
 	echo "WARNING: Cleaning, option -g ignored." >&2
     fi
+    if [ "$dotest" = true ]; then
+	echo "WARNING: Cleaning, option -t ignored." >&2
+    fi
     ## Cleaning PDF.
     if [ "$docleanpdf" = true ]; then
 	echo "Cleaning PDF..."
 	rm -fv "$prefix".pdf
     fi
 else
-    ## Knitting.
-    if [ "$doknit" = true ]; then
-	echo "Knitting..."
-	R --slave -e "library(knitr); knit('${prefix}.Rnw')"
-	## Error if not knitting and no .tex exists.
-    else
-	if ! [ -a "$prefix".tex ]; then
-	    echo "ERROR: .tex doesn't exist." >&2
-	    exit 3
-	fi
+    ## Testing knitting.
+    if [ "$dotest" = true ]; then
+	R --vanilla -e "library(knitr); knit('${prefix}.Rnw')"
+	else
+	    ## Knitting.
+	    if [ "$doknit" = true ]; then
+		echo "Knitting..."
+		R --slave -e "library(knitr); knit('${prefix}.Rnw')"
+		## Error if not knitting and no .tex exists.
+	    else
+		if ! [ -a "$prefix".tex ]; then
+		    echo "ERROR: .tex doesn't exist." >&2
+		    exit 3
+		fi
+	    fi
     fi
     ## Embedding fonts.
     if [ "$doembed" = true ]; then
@@ -109,7 +124,9 @@ else
 	R --slave -e "library(extrafont); files <- list.files(pattern = '.pdf'); for (i in files) embed_fonts(i, outfile = i)"
 	cd ..
     fi
-    pdflatex "$prefix"
+    if [ "$dopdf" = true ]; then
+	pdflatex "$prefix"
+    fi
     ## Bibtexing.
     if [ "$dobib" = true ]; then
 	echo "Bibtexing..."
@@ -121,6 +138,8 @@ else
 	makeglossaries "$prefix"
     fi
     ## Compiling .pdf.
-    pdflatex "$prefix"
-    pdflatex "$prefix"
+    if [ "$dopdf" = true ]; then
+	pdflatex "$prefix"
+	pdflatex "$prefix"
+    fi
 fi
