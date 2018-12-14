@@ -77,7 +77,7 @@ fi
 ## Cleaning.
 if [ "$doclean" = true ]; then
     echo "Cleaning..."
-    rm -rfv *~ "$prefix".acn "$prefix".acr  "$prefix".alg "$prefix".aux "$prefix".bbl "$prefix".blg "$prefix".fff "$prefix".glg "$prefix".glo "$prefix".gls "$prefix".ilg "$prefix".ind "$prefix".ist "$prefix".log "$prefix".nlg "$prefix".nlg5 "$prefix".not "$prefix".not5 "$prefix".ntn "$prefix".ntn5 "$prefix".out "$prefix".toc "$prefix".nav "$prefix".snm "$prefix".spc "$prefix".spe "$prefix".sps "$prefix".vrb texput.log
+    rm -rfv *~ "$prefix".acn "$prefix".acr  "$prefix".alg "$prefix".aux "$prefix".bbl "$prefix".blg "$prefix".fff "$prefix".glg "$prefix".glo "$prefix".gls "$prefix".ilg "$prefix".ind "$prefix".ist "$prefix".log "$prefix".nlg "$prefix".nlg5 "$prefix".not "$prefix".not5 "$prefix".ntn "$prefix".ntn5 "$prefix".out "$prefix".toc "$prefix".nav "$prefix".snm "$prefix".spc "$prefix".spe "$prefix".sps "$prefix"*.vrb texput.log
     ## Warnings when flags set while cleaning.
     if [ "$rnw_exists" = true ]; then
 	rm -rfv "$prefix".tex cache figure
